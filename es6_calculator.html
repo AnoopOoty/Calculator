@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ES6 Calculator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f5f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+            transition: background-color 0.3s ease;
+        }
+
+        body.dark-mode {
+            background: #1a1a1a;
+        }
+
+        .calculator {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e0e0e0;
+            max-width: 320px;
+            width: 100%;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        body.dark-mode .calculator {
+            background: #2d2d2d;
+            border: 1px solid #404040;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .display {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 16px;
+            text-align: right;
+            min-height: 70px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            border: 1px solid #e9ecef;
+            transition: all 0.3s ease;
+        }
+
+        body.dark-mode .display {
+            background: #1e1e1e;
+            border: 1px solid #404040;
+        }
+
+        .previous-operand {
+            color: #6c757d;
+            font-size: 0.9rem;
+            margin-bottom: 4px;
+            min-height: 18px;
+            transition: color 0.3s ease;
+        }
+
+        body.dark-mode .previous-operand {
+            color: #adb5bd;
+        }
+
+        .current-operand {
+            color: #212529;
+            font-size: 1.8rem;
+            font-weight: 500;
+            word-wrap: break-word;
+            word-break: break-all;
+            min-height: 36px;
+            transition: color 0.3s ease;
+        }
+
+        body.dark-mode .current-operand {
+            color: #f8f9fa;
+        }
+
+        .buttons {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+        }
+
+        button {
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 500;
+            height: 52px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            border: 1px solid #dee2e6;
+        }
+
+        .btn-number {
+            background: #ffffff;
+            color: #495057;
+        }
+
+        body.dark-mode .btn-number {
+            background: #404040;
+            color: #f8f9fa;
+            border: 1px solid #555555;
+        }
+
+        .btn-operator {
+            background: #e9ecef;
+            color: #495057;
+        }
+
+        body.dark-mode .btn-operator {
+            background: #6c757d;
+            color: #f8f9fa;
+            border: 1px solid #777777;
+        }
+
+        .btn-clear {
+            background: #f8f9fa;
+            color: #6c757d;
+        }
+
+        body.dark-mode .btn-clear {
+            background: #495057;
+            color: #f8f9fa;
+            border: 1px solid #666666;
+        }
+
+        .btn-delete {
+            background: #f8f9fa;
+            color: #6c757d;
+        }
+
+        body.dark-mode .btn-delete {
+            background: #495057;
+            color: #f8f9fa;
+            border: 1px solid #666666;
+        }
+
+        .btn-equals {
+            background: #e9ecef;
+            color: #495057;
+        }
+
+        body.dark-mode .btn-equals {
+            background: #6c757d;
+            color: #f8f9fa;
+            border: 1px solid #777777;
+        }
+
+        .dark-mode-toggle {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            background: #6c757d;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        body.dark-mode .dark-mode-toggle {
+            background: #ffc107;
+            color: #212529;
+        }
+
+        .dark-mode-toggle:hover {
+            transform: scale(1.1);
+        }
+
+        .btn-zero {
+            grid-column: span 2;
+        }
+    </style>
+</head>
+<body>
+    <div class="calculator">
+        <button class="dark-mode-toggle" onclick="toggleDarkMode()" title="Toggle Dark Mode">🌙</button>
+        <div class="display">
+            <div class="previous-operand" id="previousOperand"></div>
+            <div class="current-operand" id="currentOperand">0</div>
+        </div>
+        <div class="buttons">
+            <button class="btn-clear" onclick="calculator.clear()">AC</button>
+            <button class="btn-delete" onclick="calculator.delete()">DEL</button>
+            <button class="btn-operator" onclick="calculator.chooseOperation('/')">&divide;</button>
+            <button class="btn-operator" onclick="calculator.chooseOperation('*')">&times;</button>
+            
+            <button class="btn-number" onclick="calculator.appendNumber('7')">7</button>
+            <button class="btn-number" onclick="calculator.appendNumber('8')">8</button>
+            <button class="btn-number" onclick="calculator.appendNumber('9')">9</button>
+            <button class="btn-operator" onclick="calculator.chooseOperation('-')">-</button>
+            
+            <button class="btn-number" onclick="calculator.appendNumber('4')">4</button>
+            <button class="btn-number" onclick="calculator.appendNumber('5')">5</button>
+            <button class="btn-number" onclick="calculator.appendNumber('6')">6</button>
+            <button class="btn-operator" onclick="calculator.chooseOperation('+')">+</button>
+            
+            <button class="btn-number" onclick="calculator.appendNumber('1')">1</button>
+            <button class="btn-number" onclick="calculator.appendNumber('2')">2</button>
+            <button class="btn-number" onclick="calculator.appendNumber('3')">3</button>
+            <button class="btn-number" onclick="calculator.appendNumber('.')">.</button>
+            
+            <button class="btn-number btn-zero" onclick="calculator.appendNumber('0')">0</button>
+            <button class="btn-equals" onclick="calculator.compute()">=</button>
+        </div>
+    </div>
+
+    <script>
+        class Calculator {
+            constructor(previousOperandElement, currentOperandElement) {
+                this.previousOperandElement = previousOperandElement;
+                this.currentOperandElement = currentOperandElement;
+                this.clear();
+            }
+
+            clear() {
+                this.currentOperand = '';
+                this.previousOperand = '';
+                this.operation = undefined;
+                this.updateDisplay();
+            }
+
+            delete() {
+                this.currentOperand = this.currentOperand.toString().slice(0, -1);
+                this.updateDisplay();
+            }
+
+            appendNumber(number) {
+                if (number === '.' && this.currentOperand.includes('.')) return;
+                this.currentOperand = this.currentOperand.toString() + number.toString();
+                this.updateDisplay();
+            }
+
+            chooseOperation(operation) {
+                if (this.currentOperand === '') return;
+                if (this.previousOperand !== '') {
+                    this.compute();
+                }
+                this.operation = operation;
+                this.previousOperand = this.currentOperand;
+                this.currentOperand = '';
+                this.updateDisplay();
+            }
+
+            compute() {
+                let computation;
+                const prev = parseFloat(this.previousOperand);
+                const current = parseFloat(this.currentOperand);
+                
+                if (isNaN(prev) || isNaN(current)) return;
+                
+                switch (this.operation) {
+                    case '+':
+                        computation = prev + current;
+                        break;
+                    case '-':
+                        computation = prev - current;
+                        break;
+                    case '*':
+                        computation = prev * current;
+                        break;
+                    case '/':
+                        if (current === 0) {
+                            alert('Cannot divide by zero!');
+                            return;
+                        }
+                        computation = prev / current;
+                        break;
+                    default:
+                        return;
+                }
+                
+                this.currentOperand = computation;
+                this.operation = undefined;
+                this.previousOperand = '';
+                this.updateDisplay();
+            }
+
+            getDisplayNumber(number) {
+                const stringNumber = number.toString();
+                const integerDigits = parseFloat(stringNumber.split('.')[0]);
+                const decimalDigits = stringNumber.split('.')[1];
+                
+                let integerDisplay;
+                if (isNaN(integerDigits)) {
+                    integerDisplay = '';
+                } else {
+                    integerDisplay = integerDigits.toLocaleString('en', {
+                        maximumFractionDigits: 0
+                    });
+                }
+                
+                if (decimalDigits != null) {
+                    return `${integerDisplay}.${decimalDigits}`;
+                } else {
+                    return integerDisplay;
+                }
+            }
+
+            updateDisplay() {
+                this.currentOperandElement.innerText = 
+                    this.getDisplayNumber(this.currentOperand) || '0';
+                
+                if (this.operation != null) {
+                    this.previousOperandElement.innerText = 
+                        `${this.getDisplayNumber(this.previousOperand)} ${this.operation}`;
+                } else {
+                    this.previousOperandElement.innerText = '';
+                }
+            }
+        }
+
+        // ES6 Features used:
+        // - Classes
+        // - Template literals
+        // - Arrow functions (in event listeners below)
+        // - Const/let declarations
+        // - Default parameters
+        // - Destructuring (could be added for operation handling)
+
+        // Initialize calculator
+        const previousOperandElement = document.getElementById('previousOperand');
+        const currentOperandElement = document.getElementById('currentOperand');
+        const calculator = new Calculator(previousOperandElement, currentOperandElement);
+
+        // Dark mode functionality
+        const toggleDarkMode = () => {
+            document.body.classList.toggle('dark-mode');
+            const isDarkMode = document.body.classList.contains('dark-mode');
+            const toggleButton = document.querySelector('.dark-mode-toggle');
+            toggleButton.textContent = isDarkMode ? '☀️' : '🌙';
+            
+            // Save preference to localStorage (note: this is for demonstration - 
+            // in Claude artifacts, this won't persist between sessions)
+            try {
+                localStorage.setItem('darkMode', isDarkMode);
+            } catch (e) {
+                // localStorage not available in Claude artifacts
+            }
+        };
+
+        // Load dark mode preference
+        try {
+            const savedDarkMode = localStorage.getItem('darkMode');
+            if (savedDarkMode === 'true') {
+                toggleDarkMode();
+            }
+        } catch (e) {
+            // localStorage not available in Claude artifacts
+        }
+
+        // Keyboard support using ES6 arrow functions
+        document.addEventListener('keydown', (e) => {
+            const key = e.key;
+            
+            if (key >= '0' && key <= '9' || key === '.') {
+                calculator.appendNumber(key);
+            } else if (['+', '-', '*', '/'].includes(key)) {
+                calculator.chooseOperation(key);
+            } else if (key === 'Enter' || key === '=') {
+                e.preventDefault();
+                calculator.compute();
+            } else if (key === 'Escape') {
+                calculator.clear();
+            } else if (key === 'Backspace') {
+                calculator.delete();
+            }
+        });
+
+        // Optional: Add some advanced ES6 features
+        const operations = new Map([
+            ['+', (a, b) => a + b],
+            ['-', (a, b) => a - b],
+            ['*', (a, b) => a * b],
+            ['/', (a, b) => b !== 0 ? a / b : (() => { throw new Error('Division by zero'); })()]
+        ]);
+
+        // You could replace the switch statement in compute() with:
+        // computation = operations.get(this.operation)(prev, current);
+    </script>
+</body>
+</html>
