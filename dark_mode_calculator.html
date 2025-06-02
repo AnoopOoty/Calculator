@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modern Calculator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        body.dark {
+            background: linear-gradient(135deg, #0c0c0c 0%, #1a1a1a 100%);
+        }
+
+        .calculator {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            padding: 24px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+            min-width: 320px;
+        }
+
+        .dark .calculator {
+            background: rgba(30, 30, 30, 0.9);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #333;
+            transition: color 0.3s ease;
+        }
+
+        .dark .title {
+            color: #fff;
+        }
+
+        .theme-toggle {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .theme-toggle:hover {
+            background: rgba(0, 0, 0, 0.1);
+            transform: scale(1.1);
+        }
+
+        .dark .theme-toggle:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .display {
+            background: rgba(0, 0, 0, 0.05);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 20px;
+            text-align: right;
+            transition: all 0.3s ease;
+        }
+
+        .dark .display {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .result {
+            font-size: 2.5rem;
+            font-weight: 300;
+            color: #333;
+            margin-bottom: 8px;
+            min-height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            word-break: break-all;
+            transition: color 0.3s ease;
+        }
+
+        .dark .result {
+            color: #fff;
+        }
+
+        .expression {
+            font-size: 1rem;
+            color: #666;
+            min-height: 20px;
+            transition: color 0.3s ease;
+        }
+
+        .dark .expression {
+            color: #999;
+        }
+
+        .buttons {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+        }
+
+        .btn {
+            border: none;
+            border-radius: 16px;
+            font-size: 1.2rem;
+            font-weight: 500;
+            height: 60px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: all 0.3s ease;
+        }
+
+        .btn:active::before {
+            width: 120%;
+            height: 120%;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .btn-number {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            color: #212529;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .dark .btn-number {
+            background: linear-gradient(135deg, #495057 0%, #343a40 100%);
+            color: #fff;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .btn-operator {
+            background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+            color: white;
+            border: none;
+        }
+
+        .btn-function {
+            background: linear-gradient(135deg, #343a40 0%, #212529 100%);
+            color: white;
+            border: none;
+        }
+
+        .btn-equals {
+            background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+            color: white;
+            border: none;
+            grid-column: span 2;
+        }
+
+        .btn-zero {
+            grid-column: span 2;
+        }
+
+        @media (max-width: 480px) {
+            .calculator {
+                margin: 20px;
+                padding: 20px;
+                min-width: unset;
+            }
+            
+            .result {
+                font-size: 2rem;
+            }
+            
+            .btn {
+                height: 50px;
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="calculator">
+        <div class="header">
+            <h1 class="title">Calculator</h1>
+            <button class="theme-toggle" id="themeToggle">🌙</button>
+        </div>
+        
+        <div class="display">
+            <div class="result" id="result">0</div>
+            <div class="expression" id="expression"></div>
+        </div>
+        
+        <div class="buttons">
+            <button class="btn btn-function" data-action="clear">C</button>
+            <button class="btn btn-function" data-action="backspace">⌫</button>
+            <button class="btn btn-operator" data-action="operator" data-value="/">÷</button>
+            <button class="btn btn-operator" data-action="operator" data-value="*">×</button>
+            
+            <button class="btn btn-number" data-action="number" data-value="7">7</button>
+            <button class="btn btn-number" data-action="number" data-value="8">8</button>
+            <button class="btn btn-number" data-action="number" data-value="9">9</button>
+            <button class="btn btn-operator" data-action="operator" data-value="-">-</button>
+            
+            <button class="btn btn-number" data-action="number" data-value="4">4</button>
+            <button class="btn btn-number" data-action="number" data-value="5">5</button>
+            <button class="btn btn-number" data-action="number" data-value="6">6</button>
+            <button class="btn btn-operator" data-action="operator" data-value="+">+</button>
+            
+            <button class="btn btn-number" data-action="number" data-value="1">1</button>
+            <button class="btn btn-number" data-action="number" data-value="2">2</button>
+            <button class="btn btn-number" data-action="number" data-value="3">3</button>
+            <button class="btn btn-number" data-action="decimal">.</button>
+            
+            <button class="btn btn-number btn-zero" data-action="number" data-value="0">0</button>
+            <button class="btn btn-equals" data-action="equals">=</button>
+        </div>
+    </div>
+
+    <script>
+        class Calculator {
+            constructor() {
+                this.result = document.getElementById('result');
+                this.expression = document.getElementById('expression');
+                this.themeToggle = document.getElementById('themeToggle');
+                
+                this.currentInput = '0';
+                this.previousInput = '';
+                this.operator = null;
+                this.waitingForOperand = false;
+                this.isDarkMode = false;
+                
+                this.init();
+            }
+            
+            init() {
+                this.attachEventListeners();
+                this.loadTheme();
+            }
+            
+            attachEventListeners() {
+                document.addEventListener('click', (e) => {
+                    if (e.target.matches('[data-action]')) {
+                        this.handleButtonClick(e.target);
+                    }
+                });
+                
+                document.addEventListener('keydown', (e) => {
+                    this.handleKeyPress(e);
+                });
+                
+                this.themeToggle.addEventListener('click', () => {
+                    this.toggleTheme();
+                });
+            }
+            
+            handleButtonClick(button) {
+                const action = button.dataset.action;
+                const value = button.dataset.value;
+                
+                switch (action) {
+                    case 'number':
+                        this.inputNumber(value);
+                        break;
+                    case 'decimal':
+                        this.inputDecimal();
+                        break;
+                    case 'operator':
+                        this.inputOperator(value);
+                        break;
+                    case 'equals':
+                        this.calculate();
+                        break;
+                    case 'clear':
+                        this.clear();
+                        break;
+                    case 'backspace':
+                        this.backspace();
+                        break;
+                }
+                
+                this.updateDisplay();
+            }
+            
+            handleKeyPress(e) {
+                const key = e.key;
+                
+                if (key >= '0' && key <= '9') {
+                    this.inputNumber(key);
+                } else if (key === '.') {
+                    this.inputDecimal();
+                } else if (['+', '-', '*', '/'].includes(key)) {
+                    this.inputOperator(key);
+                } else if (key === 'Enter' || key === '=') {
+                    e.preventDefault();
+                    this.calculate();
+                } else if (key === 'Escape') {
+                    this.clear();
+                } else if (key === 'Backspace') {
+                    this.backspace();
+                }
+                
+                this.updateDisplay();
+            }
+            
+            inputNumber(num) {
+                if (this.waitingForOperand) {
+                    this.currentInput = num;
+                    this.waitingForOperand = false;
+                } else {
+                    this.currentInput = this.currentInput === '0' ? num : this.currentInput + num;
+                }
+            }
+            
+            inputDecimal() {
+                if (this.waitingForOperand) {
+                    this.currentInput = '0.';
+                    this.waitingForOperand = false;
+                } else if (this.currentInput.indexOf('.') === -1) {
+                    this.currentInput += '.';
+                }
+            }
+            
+            inputOperator(nextOperator) {
+                const inputValue = parseFloat(this.currentInput);
+                
+                if (this.previousInput === '') {
+                    this.previousInput = inputValue;
+                } else if (this.operator) {
+                    const currentValue = this.previousInput || 0;
+                    const newValue = this.performCalculation(currentValue, inputValue, this.operator);
+                    
+                    this.currentInput = String(newValue);
+                    this.previousInput = newValue;
+                }
+                
+                this.waitingForOperand = true;
+                this.operator = nextOperator;
+            }
+            
+            calculate() {
+                const inputValue = parseFloat(this.currentInput);
+                
+                if (this.previousInput !== '' && this.operator) {
+                    const currentValue = this.previousInput || 0;
+                    const newValue = this.performCalculation(currentValue, inputValue, this.operator);
+                    
+                    this.currentInput = String(newValue);
+                    this.previousInput = '';
+                    this.operator = null;
+                    this.waitingForOperand = true;
+                }
+            }
+            
+            performCalculation(firstOperand, secondOperand, operator) {
+                switch (operator) {
+                    case '+':
+                        return firstOperand + secondOperand;
+                    case '-':
+                        return firstOperand - secondOperand;
+                    case '*':
+                        return firstOperand * secondOperand;
+                    case '/':
+                        return secondOperand !== 0 ? firstOperand / secondOperand : 0;
+                    default:
+                        return secondOperand;
+                }
+            }
+            
+            clear() {
+                this.currentInput = '0';
+                this.previousInput = '';
+                this.operator = null;
+                this.waitingForOperand = false;
+            }
+            
+            backspace() {
+                if (this.currentInput.length > 1) {
+                    this.currentInput = this.currentInput.slice(0, -1);
+                } else {
+                    this.currentInput = '0';
+                }
+            }
+            
+            updateDisplay() {
+                this.result.textContent = this.formatNumber(this.currentInput);
+                
+                let expressionText = '';
+                if (this.previousInput !== '' && this.operator) {
+                    expressionText = `${this.formatNumber(this.previousInput)} ${this.getOperatorSymbol(this.operator)}`;
+                }
+                this.expression.textContent = expressionText;
+            }
+            
+            formatNumber(num) {
+                const number = parseFloat(num);
+                if (isNaN(number)) return '0';
+                
+                // Handle very large or very small numbers
+                if (Math.abs(number) > 1e10 || (Math.abs(number) < 1e-6 && number !== 0)) {
+                    return number.toExponential(6);
+                }
+                
+                // Format with appropriate decimal places
+                return number.toString();
+            }
+            
+            getOperatorSymbol(operator) {
+                switch (operator) {
+                    case '+': return '+';
+                    case '-': return '-';
+                    case '*': return '×';
+                    case '/': return '÷';
+                    default: return '';
+                }
+            }
+            
+            toggleTheme() {
+                this.isDarkMode = !this.isDarkMode;
+                document.body.classList.toggle('dark', this.isDarkMode);
+                this.themeToggle.textContent = this.isDarkMode ? '☀️' : '🌙';
+                this.saveTheme();
+            }
+            
+            saveTheme() {
+                // In a real environment, you would use localStorage here
+                // For this demo, we'll just store it in memory
+                this.themePreference = this.isDarkMode;
+            }
+            
+            loadTheme() {
+                // In a real environment, you would load from localStorage here
+                // For this demo, we'll default to light mode
+                if (this.themePreference) {
+                    this.isDarkMode = this.themePreference;
+                    document.body.classList.toggle('dark', this.isDarkMode);
+                    this.themeToggle.textContent = this.isDarkMode ? '☀️' : '🌙';
+                }
+            }
+        }
+        
+        // Initialize the calculator when the DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            new Calculator();
+        });
+    </script>
+</body>
+</html>
